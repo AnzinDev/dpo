@@ -9,9 +9,12 @@ read_data = []
 def main():
     client = mqtt.Client("mqtt-sub-1")
     client.connect(broker, port)
+
     def on_message(client, userdata, message):
         count_avg(float(message.payload.decode()))
+    
     client.on_message = on_message
+    client.on_message
     client.subscribe(topic)
     client.loop_forever()
 
@@ -23,5 +26,6 @@ def count_avg(num):
     if msg_count > 2:
         l = len(read_data)
         print(f"Sliding avg = {round(read_data[l - 1] * 0.6 + read_data[l - 2] * 0.3 + read_data[l - 3] * 0.1, 2)}")
+
 
 main()
