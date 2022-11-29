@@ -3,7 +3,7 @@ import sys
 import math
 import time
 
-timescale = 0.5
+timescale = 1
 
 class publisher:
     def __init__(self, brocker_adr, port, topic, spd, ang) -> None:
@@ -36,11 +36,10 @@ class publisher:
 
 points = []
 
-def read_point_file():
+def read_point_file(path):
     points_list = []
-    with open(f'./{sys.argv[6]}') as f:
+    with open(path) as f:
         points_list = f.readlines()
-
     for point in points_list:
         coords = point[:-1].split(' ')
         points.append((float(coords[0]), float(coords[1])))
@@ -59,12 +58,20 @@ def algotithm_exec(client):
             client.publish(f"{{\"cmd\":movement, \"value\":\"{round(distance, 2)}\"}}")
             wait_move(distance, client.speed)
             continue
-        distance = math.sqrt((curr[0] - next[0]) * (curr[0] - next[0]) + (curr[1] - next[1]) * (curr[1] - next[1]))
-        angle = math.degrees(math.acos((curr[0] * next[0] + curr[1] * next[1]) / (math.sqrt(next[0] ** 2 + next[1] ** 2) * math.sqrt(curr[0] **2  + curr[1] ** 2))))
+        distance = CalcDistanse(curr, next)
+        angle = CaclAngle(curr, next)
         client.publish(f"{{\"cmd\":rotation, \"value\":\"{round(angle, 2)}\"}}")
         wait_rotation(angle, client.rotation_speed)
         client.publish(f"{{\"cmd\":movement, \"value\":\"{round(distance, 2)}\"}}")
         wait_move(distance, client.speed)
+
+
+def CalcDistanse(p_from, p_to):
+    return math.sqrt((p_from[0] - p_to[0]) * (p_from[0] - p_to[0]) + (p_from[1] - p_to[1]) * (p_from[1] - p_to[1]))
+
+
+def CaclAngle(p_from, p_to):
+    return math.degrees(math.acos((p_from[0] * p_to[0] + p_from[1] * p_to[1]) / (math.sqrt(p_to[0] ** 2 + p_to[1] ** 2) * math.sqrt(p_from[0] **2  + p_from[1] ** 2))))
 
 
 def wait_rotation(angle, rot_speed):
@@ -80,7 +87,7 @@ def wait_move(dist, speed):
 
 
 def main():
-    read_point_file()
+    read_point_file(f'./{sys.argv[6]}')
     client = publisher(brocker_adr=sys.argv[1], port=int(sys.argv[2]), topic=sys.argv[3], spd=float(sys.argv[4]), ang=float(sys.argv[5]))
     algotithm_exec(client)
 
