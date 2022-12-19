@@ -1,0 +1,12 @@
+max_even_number = 40
+
+
+def even_generator(max_val):
+    for num in range(0, max_val, 2):
+        yield num
+
+
+if __name__ == "__main__":
+    generate_even = even_generator(max_even_number)
+    for even in generate_even:
+        print(even)
